@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role { USER ADMIN }
+enum UserStatus { ACTIVE SUSPENDED }
+enum RepoStatus { AVAILABLE NEW UPDATED STABLE DRAFT OFFLINE }
+enum MessageStatus { NEW READ RESOLVED }
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  downloads    DownloadEvent[]
+  activity     AdminActivity[]
+}
+
+model Category {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  icon         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  repositories Repository[]
+}
+
+model Repository {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String
+  icon        String?
+  status      RepoStatus @default(AVAILABLE)
+  language    String?
+  version     String?
+  author      String?
+  downloadUrl String?
+  sourceUrl   String?
+  demoUrl     String?
+  featured    Boolean    @default(false)
+  published   Boolean    @default(false)
+  categoryId  String?
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  metadata    RepositoryMetadata[]
+  downloads   DownloadEvent[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([title])
+  @@index([status])
+  @@index([language])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+model RepositoryMetadata {
+  id           String     @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  label        String
+  value        String
+  icon         String?
+  copyable     Boolean    @default(false)
+  sortOrder    Int        @default(0)
+
+  @@index([repositoryId])
+}
+
+// A row = one download click (not a verified completed download).
+model DownloadEvent {
+  id           String     @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipHash       String?
+  createdAt    DateTime   @default(now())
+
+  @@index([repositoryId, createdAt])
+}
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    MessageStatus @default(NEW)
+  createdAt DateTime      @default(now())
+}
+
+model WebsiteSettings {
+  id             String  @id @default("singleton")
+  siteName       String  @default("Repository Hub")
+  siteDescription String @default("Browse repositories, extensions and resources in one place.")
+  logoUrl        String?
+  faviconUrl     String?
+  footerText     String?
+  githubUrl      String?
+  discordUrl     String?
+  telegramUrl    String?
+  seoTitle       String?
+  seoDescription String?
+  primaryColor   String  @default("#7548FF")
+  aboutContent   String?
+}
+
+model AdminActivity {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action     String
+  targetType String?
+  targetId   String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
