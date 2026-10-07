@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #09090f;
+  --card: #15151f;
+  --card-2: #101018;
+  --border: #292638;
+  --border-2: #20202b;
+  --primary: #7548ff;
+  --primary-hover: #895eff;
+  --primary-active: #6439e8;
+  --text: #f5f3ff;
+  --text-2: #9b98a8;
+  --muted: #6e6a7c;
+  --success: #21c77a;
+  --warning: #f5b942;
+  --danger: #ff5757;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-card2: var(--card-2);
+  --color-line: var(--border);
+  --color-line2: var(--border-2);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-fg: var(--text);
+  --color-fg2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+}
+
+html, body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+:focus-visible { outline: 2px solid var(--primary-hover); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
